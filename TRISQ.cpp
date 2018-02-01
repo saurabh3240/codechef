@@ -19,44 +19,43 @@
 #include <cstdlib>
 #include <ctime>
 #include <limits>
-
 #include <string>
 #include <cassert>
- 
+
 using namespace std;
 typedef long long LL;
 typedef pair<int,int> pii;
- 
+
 #define forup(i,a,b) for(int i=a; i<b; ++i)
 #define fordn(i,a,b) for(int i=a; i>b; --i)
 #define rep(i,a) for(int i=0; i<a; ++i)
- 
+
 #define dforup(i,a,b) for(i=a; i<b; ++i)
 #define dfordn(i,a,b) for(i=a; i>b; --i)
 #define drep(i,a) for(i=0; i<a; ++i)
- 
+
 #define slenn(s,n) for(n=0; s[n]!=13 and s[n]!=0; ++n);s[n]=0
- 
+
 #define gi(x) scanf("%d",&x)
 #define gl(x) scanf("%lld",&x)
 #define gd(x) scanf("%lf",&x)
 #define gs(x) scanf("%s",x)
- 
 #define pis(x) printf("%d ",x)
 #define pin(x) printf("%d\n",x)
 #define pls(x) printf("%lld ",x)
 #define pln(x) printf("%lld\n",x)
 #define pds(x) printf("%.12f ",x)
 #define pdn(x) printf("%.12f\n",x)
-#define pnl() printf("\n")
- 
+#define pnl() printf("n")
 #define fs first
 #define sc second
 #define ll long long
 #define pb push_back
 #define MOD 1000000007
 #define limit 10000005
-#define INF 1000000000
+const int INF = 2000000000;
+typedef pair<int,int> PII;
+
 #define ull unsigned long long
 using namespace std;
 ull mod_pow(ull num, ull pow, ull mod)
@@ -70,44 +69,27 @@ ull mod_pow(ull num, ull pow, ull mod)
     }
     return test; /* note this is potentially lossy */
 }
-//while((getchar())!='\n'); //buffer clear
+//while((getchar())!='n'); //buffer clear
 ll gcd(ll a,ll b)
-{	ll r;
-	while(b)
-	{	r= a%b;a = b; b = r;
-	}
-	return a;
-}
-ll a[100005];
-ll b[100005];
-int main()
-{   
-    int n;
-    gi(n);
-	ll arr[n+1];
-
-    ll ans =1ll;
-    rep(i,n)
-    {
-        gl(arr[i]);
-		if(arr[i]%2==1)
-		{
-				a[i]= (arr[i]+1)/2;
-				b[i]= (arr[i]+1)/2;
-	
-		}	
-		else
-		{
-				a[i]= (arr[i])/2;
-				b[i]= (arr[i]+2)/2;	
-		}	
+{    ll r;
+    while(b)
+    {    r= a%b;a = b; b = r;
     }
-    rep(i,n)
-    {
-    	ll x =  mod_pow(a[i],2,MOD);
-    	ll y =  mod_pow(b[i],2,MOD);
-    	ans*=(x+y);
-    	ans%=MOD;
-	}
-    cout<<ans<<endl;
+    return a;
+}
+
+int main()
+{
+  int t;
+  gi(t);
+  while(t--)
+  {
+      int n;
+      gi(n);
+      int x = n/2;
+      ll ans= x*(x-1);
+      ans/=2;
+      pln(ans);
+  }
+
 }
