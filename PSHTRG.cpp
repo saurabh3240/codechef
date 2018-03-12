@@ -54,7 +54,7 @@ typedef pair<int,int> pii;
 #define pb push_back
 #define MOD 1000000007
 #define limit 100005
-#define LOG 32
+#define LOG 51
 // using namespace std;
 int arr[100005];
 
@@ -81,19 +81,10 @@ inline void fastRead_int(int &x) {
 
 
 
-int get_ind(int  x)
-{
-    int i=0;
-    while(x)
-    {   i++;
-        x>>=1;
-    }
-    return i-1;
-}
 
 struct node
 {
-    int bucket[LOG][3];
+    int bucket[51];
 };
 struct node s[4*100005];
 int n,q;
@@ -103,17 +94,11 @@ void build(int id = 1,int l = 0,int r = n)         //root index 1,children 2x,2x
     // cout<<id<<" "<<l<<" "<<r<<endl;
     if( l+1 == r )
     {
-        int ind = get_ind(arr[l]);
-        // cout<<"id "<<id<<"*********"<<endl;
         rep(i,LOG)
-        {
-            rep(j,3)
-                s[id].bucket[i][j]=-1;
-        }
-        s[id].bucket[ind][2]=arr[l];
+                s[id].bucket[i]=-1;
 
-         // cout<<arr[l]<<endl;
-
+        s[id].bucket[LOG-1]=arr[l];
+        // cout<<id<<" "<<arr[l]<<endl;
         return;             // comes from array
     }
 
@@ -122,67 +107,65 @@ void build(int id = 1,int l = 0,int r = n)         //root index 1,children 2x,2x
     int right = id*2+1;
     build( left, l, mid);           // interval = [left,right)
     build( right, mid, r);
-    // cout<<"id "<<id<<"*********"<<endl;
     rep(i,LOG)
+            s[id].bucket[i]=-1;
+
+    // Merge sort
+
+    int ind = LOG-1;
+    int l0 = LOG-1;
+    int r0 = LOG-1;
+
+
+    while(l0>=0&&r0>=0)
     {
-        rep(j,3)
+        if(s[left].bucket[l0]<0)
+            break;
+
+        if(s[right].bucket[r0]<0)
+            break;
+
+
+
+        if(s[left].bucket[l0]>s[right].bucket[r0])
         {
-            s[id].bucket[i][j]=-1;
+            s[id].bucket[ind--]=s[left].bucket[l0--];
         }
+        else
+        {
+            s[id].bucket[ind--]=s[right].bucket[r0--];
+        }
+
+        if(ind<0)
+            break;
+        // cout<<ind<<endl;
+    }
+    while(l0>=0)
+    {
+        if(s[left].bucket[l0]<0)
+            break;
+
+        s[id].bucket[ind--]=s[left].bucket[l0--];
+        if(ind<0)
+            break;
+
+
     }
 
-    rep(i,LOG)
+    while(r0>=0)
     {
+        if(s[right].bucket[r0]<0)
+            break;
 
-
-        int ind = 2;
-        int l = 2;
-        int r = 2;
-
-
-        while(l>=0&&r>=0)
-        {
-            if(s[left].bucket[i][l]>s[right].bucket[i][r])
-            {
-                s[id].bucket[i][ind--]=s[left].bucket[i][l];
-                l--;
-            }
-            else
-            {
-                s[id].bucket[i][ind--]=s[right].bucket[i][r];
-                r--;
-            }
-            if(ind<0)
-                break;
-        }
+        s[id].bucket[ind--]=s[right].bucket[r0--];
         if(ind<0)
-            continue;
-        while(l>=0)
-        {
-            s[id].bucket[i][ind--]=s[left].bucket[i][l--];
-            if(ind<0)
-                break;
-        }
-        if(ind<0)
-            continue;
-
-        while(r>=0)
-        {
-            s[id].bucket[i][ind--]=s[right].bucket[i][r--];
-            if(ind<0)
-                break;
-        }
+            break;
 
     }
+    // cout<<id<<endl;
     // rep(i,LOG)
-    // {
-    //     rep(j,3)
-    //     {
-    //         pis(s[id].bucket[i][j]);
-    //
-    //     }
-    //     pnl();
-    // }
+    //     cout<<s[id].bucket[i]<<" ";
+    // cout<<endl;
 
 }
 void modify(int p, int  x, int id=1, int l=0, int r=n)    // call modify(p,x)
@@ -191,17 +174,11 @@ void modify(int p, int  x, int id=1, int l=0, int r=n)    // call modify(p,x)
     //s[id] += x-a[p] ;         // change the value of the segtree node
     if( l+1 == r)
     {           // l=r-1=p
-
-
         rep(i,LOG)
-            rep(j,3)
-                s[id].bucket[i][j]=-1;
+            s[id].bucket[i]=-1;
 
        arr[p]=x;
-       int ind = get_ind(arr[p]);
-       s[id].bucket[ind][2]=arr[l];
-
-
+       s[id].bucket[LOG-1]=arr[l];
        return;
     }
 
@@ -220,58 +197,55 @@ void modify(int p, int  x, int id=1, int l=0, int r=n)    // call modify(p,x)
 
     rep(i,LOG)
     {
-        rep(j,3)
-        {
-            s[id].bucket[i][j]=-1;
-        }
+        s[id].bucket[i]=-1;
     }
 
-    rep(i,LOG)
+    int ind = LOG-1;
+    int l0 = LOG-1;
+    int r0 = LOG-1;
+    while(l0>=0&&r0>=0)
     {
+        if(s[left].bucket[l0]<0)
+            break;
+        if(s[right].bucket[r0]<0)
+            break;
 
-
-        int ind = 2;
-        int l = 2;
-        int r = 2;
-        while(l>=0&&r>=0)
+        if(s[left].bucket[l0]>s[right].bucket[r0])
         {
-            if(s[left].bucket[i][l]>s[right].bucket[i][r])
-            {
-                s[id].bucket[i][ind--]=s[left].bucket[i][l];
-                l--;
-            }
-            else
-            {
-                s[id].bucket[i][ind--]=s[right].bucket[i][r];
-                r--;
-            }
-            if(ind<0)
-                break;
+            s[id].bucket[ind--]=s[left].bucket[l0--];
         }
-        if(ind<0)
-            continue;
-
-        while(l>=0)
+        else
         {
-            s[id].bucket[i][ind--]=s[left].bucket[i][l--];
-            if(ind<0)
-                break;
+            s[id].bucket[ind--]=s[right].bucket[r0--];
         }
         if(ind<0)
             break;
+    }
+    while(l0>=0)
+    {
+        if(s[left].bucket[l0]<0)
+            break;
 
-        while(r>=0)
-        {
-            s[id].bucket[i][ind--]=s[right].bucket[i][r--];
-            if(ind<0)
-                break;
-        }
+        s[id].bucket[ind--]=s[left].bucket[l0--];
+        if(ind<0)
+            break;
+
+
+    }
+
+    while(r0>=0)
+    {
+        if(s[right].bucket[r0]<0)
+            break;
+
+        s[id].bucket[ind--]=s[right].bucket[r0--];
+        if(ind<0)
+            break;
+
     }
 
 }
-//
-//
-//
+
 struct node query(int x,int y,int id=1,int l=0,int r=n){        //verify return type
                             // call query(l,r)
     struct node zero;
@@ -280,8 +254,7 @@ struct node query(int x,int y,int id=1,int l=0,int r=n){        //verify return 
     if( x >= r or l >= y )
     {
         rep(i,LOG)
-            rep(j,3)
-                zero.bucket[i][j]=-1;
+            zero.bucket[i]=-1;
 
         return zero;    // no overlap
 
@@ -298,51 +271,50 @@ struct node query(int x,int y,int id=1,int l=0,int r=n){        //verify return 
 
     rep(i,LOG)
     {
-        rep(j,3)
-        {
-            n3.bucket[i][j]=-1;
-        }
+            n3.bucket[i]=-1;
     }
-    rep(i,LOG)
-    {
 
-
-        int ind = 2;
-        int l = 2;
-        int r = 2;
-        while(l>=0&&r>=0)
-        {
-            if(n1.bucket[i][l]>n2.bucket[i][r])
+        int ind = LOG-1;
+        int l0 = LOG-1;
+        int r0 = LOG-1;
+        while(l0>=0&&r0>=0)
+        {   if(n1.bucket[l0]<0)
+                break;
+            if(n2.bucket[r0]<0)
+                break;
+            if(n1.bucket[l0]>n2.bucket[r0])
             {
-                n3.bucket[i][ind--]=n1.bucket[i][l];
-                l--;
+                n3.bucket[ind--]=n1.bucket[l0--];
             }
             else
             {
-                n3.bucket[i][ind--]=n2.bucket[i][r];
-                r--;
+                n3.bucket[ind--]=n2.bucket[r0--];
             }
             if(ind<0)
                 break;
-        }
-        if(ind<0)
-            continue;
-        while(l>=0)
-        {
-            n3.bucket[i][ind--]=n1.bucket[i][l--];
-            if(ind<0)
-                break;
-        }
-        if(ind<0)
-            continue;
 
-        while(r>=0)
+        }
+        while(l0>=0)
         {
-            n3.bucket[i][ind--]=n2.bucket[i][r--];
+
+            if(n1.bucket[l0]<0)
+                break;
+                
+            n3.bucket[ind--]=n1.bucket[l0--];
             if(ind<0)
                 break;
         }
-    }
+
+        while(r0>=0)
+        {
+            if(n2.bucket[r0]<0)
+                break;
+
+            n3.bucket[ind--]=n2.bucket[r0--];
+            if(ind<0)
+                break;
+
+        }
 
     return n3;
 }
@@ -350,150 +322,24 @@ struct node query(int x,int y,int id=1,int l=0,int r=n){        //verify return 
 ll get(int l,int r)
 {
     struct node nn = query(l,r);
-    int  bucket[LOG][3];
+    ll  bucket[LOG];
     rep(i,LOG)
     {
-        rep(j,3)
-        {    bucket[i][j]=nn.bucket[i][j];
-            // pis(nn.bucket[i][j]);
-        }
-        // pnl();
+        bucket[i]=nn.bucket[i];
+        // pis(bucket[i]);
     }
     ll ans=0;
-    for(int i=LOG-1;i>=0;i--)
+    for(int i=LOG-1;i>=2;i--)
     {
-        int b1 = 0;
-        rep(m,3)
-        {   if(bucket[i][m]!=-1)
-            b1++;
+        ll a= bucket[i];
+        ll b= bucket[i-1];
+        ll c= bucket[i-2];
+        // cout<<a<<b<<c<<endl;
+        if(a!=-1&&b!=-1&&c!=-1&&a<b+c)
+        {    ans = a+b+c;
+            return ans;
         }
-
-        if(b1==3)
-        {
-            ll a1,a2,a3;
-            a1 = bucket[i][2];
-            a2 = bucket[i][1];
-            a3 = bucket[i][0];
-            if(a1<a2+a3)
-            {
-                ans = max(ans,a1+a2+a3);
-                return ans;
-            }
-        }
-        else if(b1==2)
-        {
-            // find next index
-            ll a1,a2,a3;
-            a1 = bucket[i][2];
-            a2 = bucket[i][1];
-            // int  dif = a1-a2;
-
-            int flag=0;
-            for(int j=i-1;j>=0;j--)
-            {
-                int b2 =0;
-                rep(m,3)
-                {   if(bucket[j][m]!=-1)
-                    b2++;
-                }
-
-                if(b2>0)
-                {
-                    a3 = bucket[j][2];
-                    if(a1<a2+a3)
-                    {
-                    //cout/<<"hh222h"<<a1<<endl;
-
-                        ans = max(ans,a1+a2+a3);
-                        return ans;
-                    }
-                }
-            }
-
-            rep(kk,2)
-            {
-                a1 = bucket[i][1+kk];
-                int b2 = 0;
-                rep(m,3)
-                {   if(bucket[i-1][m]!=-1)
-                    b2++;
-                }
-
-                if(b2==1)
-                {
-                    a2 = bucket[i-1][2];
-                    for(int j=i-2;j>=0;j--)
-                    {
-                        int b3 = 0;
-                        rep(m,3)
-                        {   if(bucket[j][m]!=-1)
-                                b3++;
-                        }
-
-                        if(b3>0)
-                        {
-                            a3 = bucket[j][2];
-                            if(a1<a2+a3)
-                            {    ans = max(ans,a1+a2+a3);
-                                flag =1;
-                            }
-                        }
-                    }
-                }
-                else if(b2>1)
-                {
-                    a2 = bucket[i-1][2];
-                    a3 = bucket[i-1][1];
-                    if(a1<a2+a3)
-                    {
-                        ans = max(ans,a1+a2+a3);
-                    }
-                }
-
-            }
-
-        }
-        else if(b1==1)
-        {
-            ll a1,a2,a3;
-            a1 = bucket[i][2];
-            int b2 =0;
-            rep(m,3)
-            {   if(bucket[i-1][m]!=-1)
-                b2++;
-            }
-
-            if(b2==1)
-            {
-                a2 = bucket[i-1][2];
-                for(int j=i-2;j>=0;j--)
-                {
-                    int b3 = 0;
-                    rep(m,3)
-                    {   if(bucket[j][m]!=-1)
-                        b3++;
-                    }
-
-                    if(b3>0)
-                    {
-                        a3 = bucket[j][2];
-                        if(a1<a2+a3)
-                            ans = max(ans,a1+a2+a3);
-                    }
-                }
-            }
-            else if(b2>1)
-            {
-                a2 = bucket[i-1][2];
-                a3 = bucket[i-1][1];
-                if(a1<a2+a3)
-                    ans = max(ans,a1+a2+a3);
-            }
-
-        }
-
     }
-
     return ans;
 }
 
@@ -527,4 +373,3 @@ int main()
         }
     }
 }
-  
