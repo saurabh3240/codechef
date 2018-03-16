@@ -54,7 +54,7 @@ typedef pair<int,int> pii;
 #define pb push_back
 #define MOD 1000000007
 #define limit 100005
-#define LOG 51
+#define LOG 55
 // using namespace std;
 int arr[100005];
 
@@ -84,244 +84,182 @@ inline void fastRead_int(int &x) {
 
 struct node
 {
-    int bucket[51];
+    int bucket[LOG];
 };
-struct node s[4*100005];
+struct node tree[4*100005];
 int n,q;
 
-void build(int id = 1,int l = 0,int r = n)         //root index 1,children 2x,2x+1
-{                          // root = [0,n)
-    // cout<<id<<" "<<l<<" "<<r<<endl;
-    if( l+1 == r )
-    {
-        rep(i,LOG)
-                s[id].bucket[i]=-1;
-
-        s[id].bucket[LOG-1]=arr[l];
-        // cout<<id<<" "<<arr[l]<<endl;
-        return;             // comes from array
-    }
-
-    ll mid = l + (r-l)/2;
-    int left =id*2;
-    int right = id*2+1;
-    build( left, l, mid);           // interval = [left,right)
-    build( right, mid, r);
-    rep(i,LOG)
-            s[id].bucket[i]=-1;
-
-    // Merge sort
-
-    int ind = LOG-1;
-    int l0 = LOG-1;
-    int r0 = LOG-1;
-
-
-    while(l0>=0&&r0>=0)
-    {
-        if(s[left].bucket[l0]<0)
-            break;
-
-        if(s[right].bucket[r0]<0)
-            break;
-
-
-
-        if(s[left].bucket[l0]>s[right].bucket[r0])
-        {
-            s[id].bucket[ind--]=s[left].bucket[l0--];
-        }
-        else
-        {
-            s[id].bucket[ind--]=s[right].bucket[r0--];
-        }
-
-        if(ind<0)
-            break;
-        // cout<<ind<<endl;
-    }
-    while(l0>=0)
-    {
-        if(s[left].bucket[l0]<0)
-            break;
-
-        s[id].bucket[ind--]=s[left].bucket[l0--];
-        if(ind<0)
-            break;
-
-
-    }
-
-    while(r0>=0)
-    {
-        if(s[right].bucket[r0]<0)
-            break;
-
-        s[id].bucket[ind--]=s[right].bucket[r0--];
-        if(ind<0)
-            break;
-
-    }
-    // cout<<id<<endl;
-    // rep(i,LOG)
-    //     cout<<s[id].bucket[i]<<" ";
-    // cout<<endl;
-
-}
-void modify(int p, int  x, int id=1, int l=0, int r=n)    // call modify(p,x)
+void build_tree(int node, int a, int b)
 {
-                    //x is the value to which a[p] is changed
-    //s[id] += x-a[p] ;         // change the value of the segtree node
-    if( l+1 == r)
-    {           // l=r-1=p
-        rep(i,LOG)
-            s[id].bucket[i]=-1;
-
-       arr[p]=x;
-       s[id].bucket[LOG-1]=arr[l];
-       return;
-    }
-
-    ll mid = l + (r-l)/2;
-
-    if( p < mid )
-    {
-       modify(p, x, id*2, l, mid);
-    }
-    else
-    {
-       modify(p, x, id*2+1, mid, r);
-    }
-    int left =id*2;
-    int right = id*2+1;
+    if(a > b) return; // Out of range
 
     rep(i,LOG)
-    {
-        s[id].bucket[i]=-1;
-    }
+        tree[node].bucket[i]=-1;
 
+  	if(a == b) { // Leaf node
+    		tree[node].bucket[LOG-1] = arr[a]; // Init value
+		return;
+	}
+
+	build_tree(node*2, a, (a+b)/2); // Init left child
+	build_tree(node*2+1, 1+(a+b)/2, b); // Init right child
+
+    int left = node*2;
+    int right = node*2+1;
+    // merge
+    int l=LOG-1;
+    int r =LOG-1;
     int ind = LOG-1;
-    int l0 = LOG-1;
-    int r0 = LOG-1;
-    while(l0>=0&&r0>=0)
+    while(l>=0&&r>=0)
     {
-        if(s[left].bucket[l0]<0)
+        if(tree[left].bucket[l]<0&& tree[right].bucket[r]<0)
             break;
-        if(s[right].bucket[r0]<0)
-            break;
-
-        if(s[left].bucket[l0]>s[right].bucket[r0])
-        {
-            s[id].bucket[ind--]=s[left].bucket[l0--];
-        }
+        if(tree[left].bucket[l]>tree[right].bucket[r])
+            tree[node].bucket[ind--] = tree[left].bucket[l--];
         else
-        {
-            s[id].bucket[ind--]=s[right].bucket[r0--];
-        }
+            tree[node].bucket[ind--] = tree[right].bucket[r--];
         if(ind<0)
-            break;
+            return;
     }
-    while(l0>=0)
+    while(l>=0)
     {
-        if(s[left].bucket[l0]<0)
+        if(tree[left].bucket[l]<0)
             break;
-
-        s[id].bucket[ind--]=s[left].bucket[l0--];
+        tree[node].bucket[ind--] = tree[left].bucket[l--];
         if(ind<0)
-            break;
-
+            return;
 
     }
-
-    while(r0>=0)
+    while(r>=0)
     {
-        if(s[right].bucket[r0]<0)
+        if(tree[right].bucket[r]<0)
             break;
-
-        s[id].bucket[ind--]=s[right].bucket[r0--];
+        tree[node].bucket[ind--] = tree[right].bucket[r--];
         if(ind<0)
-            break;
-
+            return;
     }
 
 }
 
-struct node query(int x,int y,int id=1,int l=0,int r=n){        //verify return type
-                            // call query(l,r)
-    struct node zero;
+/**
+ * Increment elements within range [i, j] with value value
+ */
+void update_tree(int node, int a, int b, int i, int j, int value) {
 
-    // cout<<x<<" "<<y<<"-"<<id<<"-"<<l<<"-"<<r<<endl;
-    if( x >= r or l >= y )
-    {
-        rep(i,LOG)
-            zero.bucket[i]=-1;
-
-        return zero;    // no overlap
-
-    }
-    if( x <= l and r <= y )  return s[id];      // complete overlap
-    ll mid = l + (r-l)/2;             // partial overlap
-    int left =id*2;
-    int right = id*2+1;
-
-    struct node n1,n2,n3;
-    n1 = query(x, y, left, l, mid) ;
-    n2 = query(x, y, right, mid, r);
-
+	if(a > b || a > j || b < i) // Current segment is not within range [i, j]
+		return;
 
     rep(i,LOG)
+        tree[node].bucket[i]=-1;
+
+  	if(a == b) { // Leaf node
+
+
+    		tree[node].bucket[LOG-1] = value;
+    		return;
+	}
+
+	update_tree(node*2, a, (a+b)/2, i, j, value); // Updating left child
+	update_tree(1+node*2, 1+(a+b)/2, b, i, j, value); // Updating right child
+
+    int left = node*2;
+    int right = node*2+1;
+    // merge
+    int l=LOG-1;
+    int r =LOG-1;
+    int ind = LOG-1;
+    while(l>=0&&r>=0)
     {
-            n3.bucket[i]=-1;
+        if(tree[left].bucket[l]<0&& tree[right].bucket[r]<0)
+            break;
+        if(tree[left].bucket[l]>tree[right].bucket[r])
+            tree[node].bucket[ind--] = tree[left].bucket[l--];
+        else
+            tree[node].bucket[ind--] = tree[right].bucket[r--];
+        if(ind<0)
+            return;
+    }
+    while(l>=0)
+    {
+        if(tree[left].bucket[l]<0)
+            break;
+        tree[node].bucket[ind--] = tree[left].bucket[l--];
+        if(ind<0)
+            return;
+
+    }
+    while(r>=0)
+    {
+        if(tree[right].bucket[r]<0)
+            break;
+        tree[node].bucket[ind--] = tree[right].bucket[r--];
+        if(ind<0)
+            return;
     }
 
-        int ind = LOG-1;
-        int l0 = LOG-1;
-        int r0 = LOG-1;
-        while(l0>=0&&r0>=0)
-        {   if(n1.bucket[l0]<0)
-                break;
-            if(n2.bucket[r0]<0)
-                break;
-            if(n1.bucket[l0]>n2.bucket[r0])
-            {
-                n3.bucket[ind--]=n1.bucket[l0--];
-            }
-            else
-            {
-                n3.bucket[ind--]=n2.bucket[r0--];
-            }
-            if(ind<0)
-                break;
-
-        }
-        while(l0>=0)
-        {
-
-            if(n1.bucket[l0]<0)
-                break;
-                
-            n3.bucket[ind--]=n1.bucket[l0--];
-            if(ind<0)
-                break;
-        }
-
-        while(r0>=0)
-        {
-            if(n2.bucket[r0]<0)
-                break;
-
-            n3.bucket[ind--]=n2.bucket[r0--];
-            if(ind<0)
-                break;
-
-        }
-
-    return n3;
+	// /tree[node] = min(tree[node*2], tree[node*2+1]); // Updating root with max value
 }
+
+/**
+ * Query tree to get max element value within range [i, j]
+ */
+struct node query_tree(int node, int a, int b, int i, int j) {
+
+    struct node q3;
+    rep(i,LOG)
+        q3.bucket[i]=-1;
+
+	if(a > b || a > j || b < i) return q3; // Out of range
+
+	if(a >= i && b <= j) // Current segment is totally within range [i, j]
+		return tree[node];
+
+    struct node q1 = query_tree(node*2, a, (a+b)/2, i, j); // Query left child
+	struct node q2 = query_tree(1+node*2, 1+(a+b)/2, b, i, j); // Query right child
+
+    // struct node q3s;
+//	int res = min(q1, q2); // Return final result
+    int l=LOG-1;
+    int r =LOG-1;
+    int ind = LOG-1;
+    while(l>=0&&r>=0)
+    {
+        if(q1.bucket[l]<0&& q2.bucket[r]<0)
+            break;
+        if(q1.bucket[l]>q2.bucket[r])
+            q3.bucket[ind--] = q1.bucket[l--];
+        else
+            q3.bucket[ind--] = q2.bucket[r--];
+        if(ind<0)
+            return q3;
+    }
+    while(l>=0)
+    {
+        if(q1.bucket[l]<0)
+            break;
+        q3.bucket[ind--] = q1.bucket[l--];
+        if(ind<0)
+            return q3;
+
+    }
+    while(r>=0)
+    {
+        if(q2.bucket[r]<0)
+            break;
+        q3.bucket[ind--] = q2.bucket[r--];
+        if(ind<0)
+            return q3;
+
+	return q3;
+    }
+    return q3;
+}
+
+
 
 ll get(int l,int r)
 {
-    struct node nn = query(l,r);
+    struct node nn = query_tree(1,0,n-1,l-1,r-1);
     ll  bucket[LOG];
     rep(i,LOG)
     {
@@ -335,9 +273,8 @@ ll get(int l,int r)
         ll b= bucket[i-1];
         ll c= bucket[i-2];
         // cout<<a<<b<<c<<endl;
-        if(a!=-1&&b!=-1&&c!=-1&&a<b+c)
-        {    ans = a+b+c;
-            return ans;
+        if(a!=-1ll&&b!=-1ll&&c!=-1ll&&a<b+c)
+        {    ans = max(ans,a+b+c);
         }
     }
     return ans;
@@ -347,28 +284,28 @@ int main()
 {
 
 
-    fastRead_int(n);
-    fastRead_int(q);
+    gi(n);
+    gi(q);
     rep(i,n)
-        fastRead_int(arr[i]);
+        gi(arr[i]);
     // cout<<"starting build"<<endl;
-    build();
+    build_tree(1,0,n-1);
     // cout<<"here"<<endl;
     while(q--)
     {
         int op;
         int l,r;
-        fastRead_int(op);
-        fastRead_int(l);
-        fastRead_int(r);
+        gi(op);
+        gi(l);
+        gi(r);
         if(op==1)
         {
-            modify(l-1,r);
+            update_tree(1,0,n-1,l-1,l-1,r);
         }
         else
         {
             ll ans=0;
-            ans = get(l-1,r);
+            ans = get(l,r);
             pln(max(0ll,ans));
         }
     }
