@@ -40,6 +40,7 @@ typedef pair<int,int> pii;
 #define gl(x) scanf("%lld",&x)
 #define gd(x) scanf("%lf",&x)
 #define gs(x) scanf("%s",x)
+
 #define pis(x) printf("%d ",x)
 #define pin(x) printf("%d\n",x)
 #define pls(x) printf("%lld ",x)
@@ -47,15 +48,14 @@ typedef pair<int,int> pii;
 #define pds(x) printf("%.12f ",x)
 #define pdn(x) printf("%.12f\n",x)
 #define pnl() printf("\n")
+
 #define fs first
 #define sc second
 #define ll long long
 #define pb push_back
 #define MOD 1000000007
 #define limit 10000005
-const int INF = 2000000000;
-typedef pair<int,int> PII;
-
+#define INF 1000000000
 #define ull unsigned long long
 using namespace std;
 ull mod_pow(ull num, ull pow, ull mod)
@@ -69,98 +69,59 @@ ull mod_pow(ull num, ull pow, ull mod)
     }
     return test; /* note this is potentially lossy */
 }
-//while((getchar())!='n'); //buffer clear
+//while((getchar())!='\n'); //buffer clear
 ll gcd(ll a,ll b)
-{    ll r;
-    while(b)
-    {    r= a%b;a = b; b = r;
-    }
-    return a;
+{	ll r;
+	while(b)
+	{	r= a%b;a = b; b = r;
+	}
+	return a;
 }
-int n;
-int tot;
-std::vector<int> st;// stackfinal
-std::vector<std::vector<int> > v;
-
-bool solvable(int top, vector<int> vpos)
+void multiply(ll F[2][2], ll M[2][2],ll k)
 {
-    //  cout<<top<<" ";
-    // rep(i,v.size())
-    // {
-    //     pis(vpos[i]);
-    // }
-    // pnl();
-    if(top==tot)
-    {
-        rep(i,v.size())
-        {
-            if(vpos[i]!=0)
-                return false;
-        }
-        return true;
-    }
-    bool ret = false;
-    rep(i,v.size())
-    {
-        if(vpos[i]>0 && st[top]==v[i][vpos[i]-1])
-        {
-            // cout<<st[top]<<"--"<<v[i][vpos[i]-1]<<"--"<<top<<" "<<i<<"--"<<vpos[i]-1<<endl;
-            vpos[i]--;
-            ret |=solvable(top+1,vpos);
-            vpos[i]++;
-        }
-        if(ret)
-            return ret;
-    }
-    return ret;
+  ll x =  (F[0][0]*M[0][0] )%k+ (F[0][1]*M[1][0])%k;
+  ll y =  (F[0][0]*M[0][1] )%k+ (F[0][1]*M[1][1])%k;
+  ll z =  (F[1][0]*M[0][0] )%k+ (F[1][1]*M[1][0])%k;
+  ll w =  (F[1][0]*M[0][1] )%k+ (F[1][1]*M[1][1])%k;
+
+  F[0][0] = x%k;
+  F[0][1] = y%k;
+  F[1][0] = z%k;
+  F[1][1] = w%k;
+}
+
+/* Optimized version of power() in method 4 */
+void powerf(ll F[2][2], ll n,ll k)
+{
+  if( n == 0 || n == 1)
+      return;
+  ll M[2][2] = {{1,1},{1,0}};
+
+  powerf(F, n/2,k);
+  multiply(F, F ,k );
+  if (n%2 != 0)
+     multiply(F, M,k);
+}
+ll fib(ll n,ll k)
+{
+  ll F[2][2] = {{1,1},{1,0}};
+  if (n == 0)
+      return 0;
+  powerf(F, n-1,k);
+  return F[0][0]%k;
 }
 
 int main()
 {
-  int t;
-  gi(t);
-  while(t--)
-  {
-      gi(n);
-      v.clear();
-      st.clear();
-      tot=0;
-      std::vector<int> vpos_l;
-      rep(i,n)
-      {
-          std::vector<int> vc;
-          int x;
-          gi(x);
-          vpos_l.pb(x);
-          tot+=x;
-          rep(j,x)
-          {
-              int y;
-              gi(y);
-              vc.pb(y);
-           }
-           v.pb(vc);
-      }
-
-      rep(i,tot)
-      {
-          int y;
-          gi(y);
-          st.pb(y);
-      }
-     //  rep(i,st.size())
-     //    pis(st[i]);
-     // pnl();
-      // cout<<"here"<<endl;
-      if(solvable(0,vpos_l))
-      {
-          cout<<"Yes"<<endl;
-      }
-      else
-      {
-          cout<<"No"<<endl;
-      }
-
-  }
+    int t;
+    gi(t);
+    while(t--)
+    {
+        int n,k;
+        gi(n);
+        gi(k);
+        ll x =fib(n,k);
+        pln((2ll*x)%k);
+    }
 
 }

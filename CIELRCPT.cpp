@@ -40,6 +40,7 @@ typedef pair<int,int> pii;
 #define gl(x) scanf("%lld",&x)
 #define gd(x) scanf("%lf",&x)
 #define gs(x) scanf("%s",x)
+
 #define pis(x) printf("%d ",x)
 #define pin(x) printf("%d\n",x)
 #define pls(x) printf("%lld ",x)
@@ -47,15 +48,14 @@ typedef pair<int,int> pii;
 #define pds(x) printf("%.12f ",x)
 #define pdn(x) printf("%.12f\n",x)
 #define pnl() printf("\n")
+
 #define fs first
 #define sc second
 #define ll long long
 #define pb push_back
 #define MOD 1000000007
 #define limit 10000005
-const int INF = 2000000000;
-typedef pair<int,int> PII;
-
+#define INF 1000000000
 #define ull unsigned long long
 using namespace std;
 ull mod_pow(ull num, ull pow, ull mod)
@@ -69,98 +69,33 @@ ull mod_pow(ull num, ull pow, ull mod)
     }
     return test; /* note this is potentially lossy */
 }
-//while((getchar())!='n'); //buffer clear
+//while((getchar())!='\n'); //buffer clear
 ll gcd(ll a,ll b)
-{    ll r;
-    while(b)
-    {    r= a%b;a = b; b = r;
-    }
-    return a;
-}
-int n;
-int tot;
-std::vector<int> st;// stackfinal
-std::vector<std::vector<int> > v;
-
-bool solvable(int top, vector<int> vpos)
-{
-    //  cout<<top<<" ";
-    // rep(i,v.size())
-    // {
-    //     pis(vpos[i]);
-    // }
-    // pnl();
-    if(top==tot)
-    {
-        rep(i,v.size())
-        {
-            if(vpos[i]!=0)
-                return false;
-        }
-        return true;
-    }
-    bool ret = false;
-    rep(i,v.size())
-    {
-        if(vpos[i]>0 && st[top]==v[i][vpos[i]-1])
-        {
-            // cout<<st[top]<<"--"<<v[i][vpos[i]-1]<<"--"<<top<<" "<<i<<"--"<<vpos[i]-1<<endl;
-            vpos[i]--;
-            ret |=solvable(top+1,vpos);
-            vpos[i]++;
-        }
-        if(ret)
-            return ret;
-    }
-    return ret;
+{	ll r;
+	while(b)
+	{	r= a%b;a = b; b = r;
+	}
+	return a;
 }
 
 int main()
 {
-  int t;
-  gi(t);
-  while(t--)
-  {
-      gi(n);
-      v.clear();
-      st.clear();
-      tot=0;
-      std::vector<int> vpos_l;
-      rep(i,n)
-      {
-          std::vector<int> vc;
-          int x;
-          gi(x);
-          vpos_l.pb(x);
-          tot+=x;
-          rep(j,x)
-          {
-              int y;
-              gi(y);
-              vc.pb(y);
-           }
-           v.pb(vc);
-      }
-
-      rep(i,tot)
-      {
-          int y;
-          gi(y);
-          st.pb(y);
-      }
-     //  rep(i,st.size())
-     //    pis(st[i]);
-     // pnl();
-      // cout<<"here"<<endl;
-      if(solvable(0,vpos_l))
-      {
-          cout<<"Yes"<<endl;
-      }
-      else
-      {
-          cout<<"No"<<endl;
-      }
-
-  }
+    int t;
+    gi(t);
+    while(t--)
+    {
+        int n;
+        gi(n);
+        int ans=0;
+        while(n>=0)
+        {
+            if(n>=2048)
+                ans+=__builtin_popcount(2048);
+            else
+                ans+=__builtin_popcount(n);
+            n-=2048;
+        }
+        pin(ans);
+    }
 
 }
