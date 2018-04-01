@@ -46,7 +46,7 @@ typedef pair<int,int> pii;
 #define pln(x) printf("%lld\n",x)
 #define pds(x) printf("%.12f ",x)
 #define pdn(x) printf("%.12f\n",x)
-#define pnl() printf("n")
+#define pnl() printf("\n")
 #define fs first
 #define sc second
 #define ll long long
@@ -84,26 +84,33 @@ std::vector<std::vector<int> > v;
 
 bool solvable(int top, vector<int> vpos)
 {
-    cout<<top<<endl;
+    //  cout<<top<<" ";
+    // rep(i,v.size())
+    // {
+    //     pis(vpos[i]);
+    // }
+    // pnl();
     if(top==tot)
     {
+        rep(i,v.size())
+        {
+            if(vpos[i]!=0)
+                return false;
+        }
         return true;
     }
-    rep(i,v.size())
-    {
-        if(v[i][vpos[i]]!=0)
+        bool ret = false;
+        rep(i,v.size())
         {
-            if(st[top]==v[i][vpos[i]-1])
+            if(vpos[i]>0 && st[top]==v[i][vpos[i]-1])
             {
+                // cout<<st[top]<<"--"<<v[i][vpos[i]-1]<<"--"<<top<<" "<<i<<"--"<<vpos[i]-1<<endl;
                 vpos[i]--;
-                bool ret;
-                ret = solvable(top+1,vpos);
-                if(ret==true)
-                    return true;
+                ret |=solvable(top+1,vpos);
+                vpos[i]--;
             }
         }
-    }
-    return false;
+        return ret;
 }
 
 int main()
@@ -114,16 +121,16 @@ int main()
   {
       gi(n);
       v.clear();
+      st.clear();
       tot=0;
       std::vector<int> vpos_l;
       rep(i,n)
       {
           std::vector<int> vc;
-
           int x;
+          gi(x);
           vpos_l.pb(x);
           tot+=x;
-          gi(x);
           rep(j,x)
           {
               int y;
@@ -132,20 +139,24 @@ int main()
            }
            v.pb(vc);
       }
+
       rep(i,tot)
       {
           int y;
           gi(y);
           st.pb(y);
       }
-      cout<<"here"<<endl;
+     //  rep(i,st.size())
+     //    pis(st[i]);
+     // pnl();
+      // cout<<"here"<<endl;
       if(solvable(0,vpos_l))
       {
-          cout<<"YES"<<endl;
+          cout<<"Yes"<<endl;
       }
       else
       {
-          cout<<"NO"<<endl;
+          cout<<"No"<<endl;
       }
 
   }
